@@ -1,0 +1,47 @@
+{
+  "viewer": {
+    "loading": "Đang tải mô hình...",
+    "loadError": "Không thể tải mô hình",
+    "noElement": "Chưa chọn phần tử nào",
+    "fitView": "Zoom vừa màn hình",
+    "section": "Mặt cắt",
+    "measure": "Đo khoảng cách",
+    "screenshot": "Chụp màn hình",
+    "wireframe": "Khung dây",
+    "fullscreen": "Toàn màn hình",
+    "defaultDisplay": "Hiển thị mặc định",
+    "ghostMode": "Chế độ Ghost",
+    "measure_tool": "Đo khoảng cách"
+  },
+  "upload": {
+    "dropLabel": "Kéo thả file IFC vào đây để upload",
+    "line1": "Kéo thả file IFC vào đây",
+    "line2": "hoặc click để chọn file",
+    "hint": "Tối đa 200MB • Hỗ trợ IFC 2x3, IFC 4"
+  },
+  "layout": {
+    "modelTree": "Mô hình",
+    "filterByType": "Lọc theo loại:",
+    "searchPlaceholder": "Tìm kiếm...",
+    "filterAll": "Tất cả",
+    "noResults": "Không tìm thấy phần tử phù hợp với bộ lọc hiện tại"
+  },
+  "properties": {
+    "panelTitle": "Thuộc tính phần tử",
+    "empty": "Click vào phần tử trong mô hình để xem thông tin"
+  },
+  "ifc": {
+    "IfcWall": "Tường",
+    "IfcSlab": "Sàn",
+    "IfcBeam": "Dầm",
+    "IfcColumn": "Cột",
+    "IfcWindow": "Cửa sổ",
+    "IfcDoor": "Cửa đi",
+    "IfcStair": "Cầu thang",
+    "IfcRoof": "Mái",
+    "IfcSpace": "Không gian / Phòng",
+    "IfcBuildingStorey": "Tầng",
+    "IfcBuilding": "Công trình",
+    "IfcSite": "Khu đất"
+  }
+}
