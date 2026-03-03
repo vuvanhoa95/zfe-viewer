@@ -107,10 +107,24 @@ async function initViewer() {
   FilteringExtensionRef = FilteringExtension
 
   // Khởi tạo viewer với cấu hình high quality từ VIEWER_PARAMS
+  // ⚠️ QUAN TRỌNG: Speckle đọc kích thước container ngay trong constructor.
+  // Phải đảm bảo container có size thực sự trước khi new Viewer().
+  const rect = viewerContainer.value.getBoundingClientRect()
+  const w = rect.width  || viewerContainer.value.offsetWidth  || 800
+  const h = rect.height || viewerContainer.value.offsetHeight || 600
+  // Gán explicit size để WebGL framebuffer có đúng kích thước ngay từ đầu
+  viewerContainer.value.style.width  = `${w}px`
+  viewerContainer.value.style.height = `${h}px`
+  console.log(`[SpeckleViewer] Container size before init: ${w}×${h}`)
+
   viewerInstance = new Viewer(viewerContainer.value, {
     ...VIEWER_PARAMS,
   })
   await viewerInstance.init()
+
+  // Sau init xóa inline style — để CSS (100% / 100%) tiếp quản
+  viewerContainer.value.style.width  = ''
+  viewerContainer.value.style.height = ''
 
   // ─── Lighting & camera: học theo cảm giác Speckle web ────────────────────────
   // Dùng DefaultLightConfiguration làm base và tinh chỉnh nhẹ để model IFC nổi bật,
