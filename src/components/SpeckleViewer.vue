@@ -106,17 +106,21 @@ async function initViewer() {
   SelectionExtensionRef = SelectionExtension
   FilteringExtensionRef = FilteringExtension
 
+  // Khởi tạo viewer với cấu hình high quality từ VIEWER_PARAMS
   viewerInstance = new Viewer(viewerContainer.value, {
     ...VIEWER_PARAMS,
-    verbose: false,
   })
   await viewerInstance.init()
 
-  // ─── Lighting: dùng DefaultLightConfiguration của Speckle ───────────────────
-  // Điều này đảm bảo render đúng như hub.zfenix.com (Speckle native)
+  // ─── Lighting & camera: học theo cảm giác Speckle web ────────────────────────
+  // Dùng DefaultLightConfiguration làm base và tinh chỉnh nhẹ để model IFC nổi bật,
+  // tránh bị quá tối hoặc quá cháy sáng.
   viewerInstance.setLightConfiguration({
-    ...DefaultLightConfiguration,  // Speckle defaults
-    indirectLightIntensity: 2.5,   // Tăng ambient nhẹ — tránh mặt khuất quá tối
+    ...DefaultLightConfiguration,
+    // Tăng indirect light để mặt khuất sáng hơn một chút (giống viewer Speckle)
+    indirectLightIntensity: 1.6,
+    // Giữ directional light vừa phải để vẫn có chiều sâu nhưng không gắt
+    directionalLightIntensity: 1.0,
   })
 
   // Register extensions
