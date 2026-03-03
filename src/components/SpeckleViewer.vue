@@ -133,12 +133,12 @@ async function initViewer() {
     // ⚡ Bật SHADED mode ngay sau khi load: giữ màu IFC + edge outlines sắc nét
     try {
       const viewModesExt = viewerInstance.getExtension(ViewModes)
-      viewModesExt.setViewMode(ViewMode.SHADED, {
+      viewModesExt.setViewMode(ViewMode.ARCTIC, {
         outlineThickness: 1,    // Độ dày edge outline (px)
         outlineColor: 0x000000, // Màu đen cho cạnh
-        outlineOpacity: 0.8,    // Opacity cạnh
+        outlineOpacity: 0.9,    // Opacity cạnh
       })
-      console.log('[SpeckleViewer] 🖼️ ViewMode set to SHADED')
+      console.log('[SpeckleViewer] 🖼️ ViewMode set to ARCTIC')
     } catch (e) {
       console.warn('[SpeckleViewer] ViewMode error:', e)
     }
