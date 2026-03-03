@@ -91,6 +91,20 @@ async function initViewer() {
   })
   await viewerInstance.init()
 
+  // ─── Lighting: sáng như phần mềm IFC (Revit/ArchiCAD) ───────────────────
+  // indirectLightIntensity (ambient) cao → mặt khuất không đen
+  // intensity (sun) vừa phải → có bóng mềm nhưng không quá tối
+  viewerInstance.setLightConfiguration({
+    enabled: true,
+    castShadow: true,
+    intensity: 5,                 // Sun intensity — vừa đủ
+    color: 0xffffff,
+    indirectLightIntensity: 4,   // Ambient light — sáng đều các mặt khuất
+    elevation: 1.0,               // ~60° cao — ánh sáng từ trên xuống
+    azimuth: 0.75,
+    shadowcatcher: false,         // Tắt shadowcatcher để tránh nền tối
+  })
+
   // Register extensions
   cameraControllerRef = viewerInstance.createExtension(CameraController)
   selectionExtRef     = viewerInstance.createExtension(SelectionExtension)
