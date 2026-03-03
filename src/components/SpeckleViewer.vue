@@ -72,14 +72,13 @@ async function initViewer() {
   const {
     Viewer,
     ViewerEvent,
+    DefaultLightConfiguration,
     CameraController,
     SelectionExtension,
     FilteringExtension,
     MeasurementsExtension,
     SectionTool,
     SectionOutlines,
-    ViewModes,
-    ViewMode,
   } = await import('@speckle/viewer')
 
   // Cache refs for later use
@@ -93,18 +92,11 @@ async function initViewer() {
   })
   await viewerInstance.init()
 
-  // ─── Lighting: sáng như phần mềm IFC (Revit/ArchiCAD) ───────────────────
-  // indirectLightIntensity (ambient) cao → mặt khuất không đen
-  // intensity (sun) vừa phải → có bóng mềm nhưng không quá tối
+  // ─── Lighting: dùng DefaultLightConfiguration của Speckle ───────────────────
+  // Điều này đảm bảo render đúng như hub.zfenix.com (Speckle native)
   viewerInstance.setLightConfiguration({
-    enabled: true,
-    castShadow: false,            // Tắt shadow rendering để tránh bóng quá tối
-    intensity: 6,                 // Sun intensity
-    color: 0xffffff,
-    indirectLightIntensity: 8,   // Ambient rất cao → mặt khuất sáng đều
-    elevation: 1.2,
-    azimuth: 0.75,
-    shadowcatcher: false,
+    ...DefaultLightConfiguration,  // Speckle defaults
+    indirectLightIntensity: 2.5,   // Tăng ambient nhẹ — tránh mặt khuất quá tối
   })
 
   // Register extensions
@@ -114,7 +106,6 @@ async function initViewer() {
   measurementsExtRef  = viewerInstance.createExtension(MeasurementsExtension)
   sectionToolRef      = viewerInstance.createExtension(SectionTool)
   viewerInstance.createExtension(SectionOutlines)
-  viewerInstance.createExtension(ViewModes)
 
   // Disable section box + measurements by default
   if (sectionToolRef)    sectionToolRef.enabled = false
@@ -125,23 +116,10 @@ async function initViewer() {
   resizeObserver = new ResizeObserver(() => viewerInstance?.resize())
   resizeObserver.observe(viewerContainer.value!)
 
-  // ─── LoadComplete: camera + populate tree + ViewMode ────────────────────
+  // ─── LoadComplete: camera + populate tree ────────────────────────
   viewerInstance.on(ViewerEvent.LoadComplete, async (resourceURL: string) => {
     console.log('[SpeckleViewer] 🎨 LoadComplete:', resourceURL)
     loadProgress.value = 100
-
-    // ⚡ Bật SHADED mode ngay sau khi load: giữ màu IFC + edge outlines sắc nét
-    try {
-      const viewModesExt = viewerInstance.getExtension(ViewModes)
-      viewModesExt.setViewMode(ViewMode.ARCTIC, {
-        outlineThickness: 1,    // Độ dày edge outline (px)
-        outlineColor: 0x000000, // Màu đen cho cạnh
-        outlineOpacity: 0.9,    // Opacity cạnh
-      })
-      console.log('[SpeckleViewer] 🖼️ ViewMode set to ARCTIC')
-    } catch (e) {
-      console.warn('[SpeckleViewer] ViewMode error:', e)
-    }
     
     // Zoom to fit sau khi geometry settle
     setTimeout(() => {
@@ -587,7 +565,7 @@ watch(
   width: 100%;
   height: 100%;
   position: relative;
-  background: #e8eaed;
+  background: #1a1a2e;
 }
 
 .overlay {
