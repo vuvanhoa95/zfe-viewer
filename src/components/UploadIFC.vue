@@ -37,7 +37,7 @@
         </div>
         <p class="upload-title">Kéo thả file IFC vào đây</p>
         <p class="upload-sub">hoặc click để chọn file (nhiều file cùng lúc)</p>
-        <p class="upload-hint">Tối đa 200MB/file • IFC 2x3, IFC 4</p>
+        <p class="upload-hint">Tối đa 500MB/file • IFC 2x3, IFC 4</p>
       </template>
 
       <!-- Queue progress -->
@@ -100,7 +100,7 @@ const CONVERTER_URL = (import.meta.env.VITE_CONVERTER_URL as string | undefined)
   || 'https://hub.zfenix.com/converter/api'
 
 const POLL_INTERVAL = 2000
-const JOB_TIMEOUT   = 600000 // 10 phút
+const JOB_TIMEOUT   = 900000 // 15 phút (khớp với proxy_read_timeout 900s)
 const MAX_CONCURRENT = 3     // Số file convert đồng thời tối đa
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -231,14 +231,14 @@ function addFiles(files: File[]) {
     }
 
     // Validate size
-    if (file.size > 200 * 1024 * 1024) {
+    if (file.size > 500 * 1024 * 1024) {
       queue.value.push({
         id: crypto.randomUUID(),
         name: file.name,
         file,
         status: 'error',
         progress: 0,
-        message: `Quá lớn: ${(file.size / (1024 * 1024)).toFixed(0)}MB (max 200MB)`,
+        message: `Quá lớn: ${(file.size / (1024 * 1024)).toFixed(0)}MB (max 500MB)`,
       })
       continue
     }

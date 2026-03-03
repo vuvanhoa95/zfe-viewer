@@ -17,39 +17,24 @@
         <button class="nav-tab" :class="{ active: activeLeftTab === 'model' }" @click="activeLeftTab = 'model'" title="Mô hình & File">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
         </button>
-        <button class="nav-tab" :class="{ active: activeLeftTab === 'filter', 'has-filter': hasActiveFilter }" @click="activeLeftTab = 'filter'" title="Filter (Color by)">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-        </button>
-        <button class="nav-tab" :class="{ active: activeLeftTab === 'issue' }" @click="activeLeftTab = 'issue'" title="Issues / Bình luận">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-        </button>
+        <!-- Filter & Tree tabs removed: these are now natively inside the hub viewer iframe.
+             Khi hub nâng cấp thêm tính năng, viewer tự động có theo mà không cần update code. -->
         <div class="nav-spacer"></div>
-        <button class="nav-tab screenshot-btn" @click="handleScreenshot" title="Chụp màn hình">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        <button class="nav-tab" @click="openHubNewTab" title="Mở trong Hub">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
         </button>
       </nav>
 
       <aside v-show="!sidebarLeftCollapsed" class="layout-sidebar-left">
-        <!-- Tab 1: Mô hình -->
-        <div v-show="activeLeftTab === 'model'" class="tab-content">
+        <!-- Tab: Upload & Mô hình -->
+        <div class="tab-content">
           <UploadIFC @model-ready="handleModelReady" />
           <ModelList />
-          <div class="sidebar-scroll">
-            <ModelTree />
-          </div>
-        </div>
-        
-        <!-- Tab 2: Filter (Color by) -->
-        <div v-show="activeLeftTab === 'filter'" class="tab-content filter-tab-wrap">
-          <!-- Sẽ chuyển FilterPanel vào đây để full chiều cao -->
-          <FilterPanel :viewer-ref="speckleRef" :inline="true" />
-        </div>
 
-        <!-- Tab 3: Issues -->
-        <div v-show="activeLeftTab === 'issue'" class="tab-content issue-tab-wrap">
-          <div class="empty-state">
-            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-            <p>Tính năng Issue đang được phát triển</p>
+          <!-- Info: giải thích về iframe mode -->
+          <div class="iframe-info-box">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#6366f1" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>Viewer powered by <a href="https://hub.zfenix.com" target="_blank" rel="noopener">hub.zfenix.com</a> — tính năng tự đồng bộ khi hub nâng cấp.</span>
           </div>
         </div>
       </aside>
@@ -71,48 +56,66 @@
       </div>
       <SpeckleViewer
         ref="speckleRef"
-        :stream-id="currentStreamId ?? ''"
-        :object-id="currentObjectId ?? ''"
-        :auth-token="speckleToken"
-        @element-selected="handleElementSelected"
-        @tree-ready="handleTreeReady"
-        @section-toggled="(v) => viewerStore.sectionEnabled = v"
-        @measure-toggled="(v) => measureActive = v"
       />
     </main>
     </div> <!-- Đóng thẻ layout-main-area TẠI ĐÂY -->
 
-    <aside class="layout-sidebar-right">
-      <PropertiesPanel :properties="selectedElement" />
+    <aside v-if="!sidebarRightCollapsed" class="layout-sidebar-right">
+      <div class="hub-info-panel">
+        <div class="hub-info-header">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#6366f1" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span>Hub Viewer Mode</span>
+        </div>
+        <p>Viewer đang chạy trực tiếp từ <strong>hub.zfenix.com</strong>.</p>
+        <p>Mọi tính năng (Filter, Measure, Section, Properties...) đều có sẵn trong viewer bên trong.</p>
+        <p>Khi hub nâng cấp, viewer này tự động được cập nhật theo.</p>
+        <div class="hub-link-row" v-if="currentHubUrl">
+          <a :href="currentHubUrl" target="_blank" rel="noopener" class="hub-open-btn">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            Mở trong Hub
+          </a>
+        </div>
+      </div>
     </aside>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import AppHeader from '@/components/AppHeader.vue'
-import ModelTree from '@/components/ModelTree.vue'
-import PropertiesPanel from '@/components/PropertiesPanel.vue'
+import ModelList from '@/components/ModelList.vue'
 import ViewerToolbar from '@/components/ViewerToolbar.vue'
 import SpeckleViewer from '@/components/SpeckleViewer.vue'
 import UploadIFC from '@/components/UploadIFC.vue'
-import ModelList from '@/components/ModelList.vue'
-import { useViewerStore, type TreeNode } from '@/stores/viewer'
+import { useViewerStore } from '@/stores/viewer'
 import { useUiStore } from '@/stores/ui'
-import { registerTempStream } from '@/utils/tempStreamManager'
-import FilterPanel from '@/components/FilterPanel.vue'
+
+// ─── ModelTree, FilterPanel, PropertiesPanel đã được bỏ ———————————————───
+// Trong iframe mode, những chức năng này được xử lý bên trong hub.zfenix.com viewer.
+// Khi hub nâng cấp (filter mới, properties panel mới, v.v.), viewer.zfenix.com
+// tự động có theo mà không cần sửa code.
+
+const HUB_BASE = (import.meta.env.VITE_SPECKLE_SERVER_URL as string | undefined) || 'https://hub.zfenix.com'
 
 const viewerStore = useViewerStore()
 const uiStore = useUiStore()
-const speckleToken = import.meta.env.VITE_SPECKLE_TOKEN as string | undefined
 
 const speckleRef = ref<InstanceType<typeof SpeckleViewer> | null>(null)
 const measureActive = ref(false)
 const loadedModels = ref<Array<{streamId: string, objectId: string}>>([])
-const activeLeftTab = ref<'model'|'filter'|'issue'>('model')
+const activeLeftTab = ref<'model'>('model')
 
-const hasActiveFilter = computed(() => viewerStore.activeColorFilter !== null)
+// ─── Hub URL (link to full Speckle UI) ───────────────────────────────────────────
+const currentStreamId = computed(() => viewerStore.currentStreamId)
+const currentHubUrl = computed(() => {
+  if (!currentStreamId.value) return null
+  return `${HUB_BASE}/streams/${currentStreamId.value}`
+})
+
+function openHubNewTab() {
+  if (currentHubUrl.value) window.open(currentHubUrl.value, '_blank', 'noopener')
+}
 
 // ─── Init from env ────────────────────────────────────────────────────────────
 // Vô hiệu hóa auto-load để tránh "đọc file cũ" theo yêu cầu user
@@ -123,64 +126,21 @@ if (!viewerStore.currentStreamId && env?.VITE_TEST_STREAM_ID) {
 }
 */
 
-// ─── Store state ─────────────────────────────────────────────────────────────
-const {
-  currentStreamId,
-  currentObjectId,
-  selectedElement,
-  displayMode,
-  sectionEnabled,
-  selectedObjectId,
-} = storeToRefs(viewerStore)
-
+// ─── Store state ─────────────────────────────────────────────────────
 const { sidebarLeftCollapsed, sidebarRightCollapsed } = storeToRefs(uiStore)
 
-// ─── Viewer → Tree sync ───────────────────────────────────────────────────────
-/** Khi user click element trong 3D viewport */
-function handleElementSelected(props: Record<string, unknown>) {
-  viewerStore.setSelectedElement(Object.keys(props).length ? props : null)
-}
-
-/** Khi viewer load xong và build được tree nodes */
-function handleTreeReady(nodes: TreeNode[]) {
-  viewerStore.setTreeNodes(nodes)
-  console.log(`[ViewerPage] 🌳 Tree ready: ${nodes.length} nodes`)
-}
-
-// ─── Tree → Viewer sync ───────────────────────────────────────────────────────
-/** Watch selectedObjectId từ store (set bởi ModelTree click) → gọi viewer */
-watch(selectedObjectId, (newId) => {
-  if (!speckleRef.value) return
-  if (newId) {
-    speckleRef.value.selectObjects([newId])
-  } else {
-    speckleRef.value.clearSelection()
-  }
-})
-
-// ─── Other handlers ───────────────────────────────────────────────────────────
+// ─── Upload handler (vẫn giữ — UploadIFC vẫn hoạt động) ──────────────────
 async function handleModelReady(newStreamId: string, newObjectId: string) {
-  // Đăng ký temp stream để cleanup khi đóng browser
-  registerTempStream(newStreamId)
-
-  // Luôn dùng addModel cho MỌI file — addModel tự chờ viewer init xong
+  // Thêm model vào SpeckleViewer (sẽ tạo embed URL mới)
   speckleRef.value?.addModel?.(newStreamId, newObjectId)
 
-  // Track metadata trong store
+  // Track trong store
   viewerStore.setModel(newStreamId, newObjectId)
-  
-  // Lấy tên file tạm (Speckle API thực tế có thể trả về tên file thật nếu sync kịp)
-  const fileName = `IFC Model ${loadedModels.value.length + 1}`
-  viewerStore.addFile({
-    name: fileName,
-    streamId: newStreamId,
-    objectId: newObjectId,
-  })
-
   loadedModels.value.push({ streamId: newStreamId, objectId: newObjectId })
-  console.log(`[ViewerPage] 📦 Models loaded: ${loadedModels.value.length}`)
+  console.log(`[ViewerPage] 📦 Model ready: ${newStreamId}`)
 }
 
+// ─── Toolbar handlers (tiếp tục tương thích) ───────────────────────────
 function handleFitView() {
   speckleRef.value?.fitView?.()
 }
@@ -189,13 +149,16 @@ function handleZoomToSelection() {
   speckleRef.value?.zoomToSelection?.()
 }
 
+const displayMode = ref<'default' | 'wireframe' | 'ghost'>('default')
+const sectionEnabled = ref(false)
+
 function handleToggleSection() {
-  viewerStore.toggleSection()
+  sectionEnabled.value = !sectionEnabled.value
   speckleRef.value?.toggleSection?.(sectionEnabled.value)
 }
 
 function handleSetMode(mode: 'default' | 'wireframe' | 'ghost') {
-  viewerStore.setDisplayMode(mode)
+  displayMode.value = mode
   speckleRef.value?.setDisplayMode?.(mode)
 }
 
@@ -299,7 +262,6 @@ const layoutClasses = computed(() => ({
   border-radius: 50%;
 }
 .nav-spacer { flex: 1; }
-.screenshot-btn:hover { color: #10b981; background: rgba(16, 185, 129, 0.1); }
 
 /* ── Khung nội dung Sidebar (thay vì grid column) ── */
 .layout-sidebar-left {
@@ -319,8 +281,7 @@ const layoutClasses = computed(() => ({
   height: 100%;
   overflow: hidden;
 }
-.filter-tab-wrap { padding: 12px; background: #0f172a; overflow-y: auto; }
-.issue-tab-wrap { padding: 12px; background: #0f172a; }
+
 
 .empty-state {
   display: flex;
@@ -389,5 +350,82 @@ const layoutClasses = computed(() => ({
 
 @media (max-width: 1023px) {
   .layout-sidebar-left { width: 250px; }
+}
+
+/* ── Hub Info Panel (right sidebar) ── */
+.hub-info-panel {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hub-info-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.hub-info-panel p {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.hub-link-row {
+  margin-top: 8px;
+}
+
+.hub-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  font-size: 12px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.hub-open-btn:hover {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: #c7d2fe;
+}
+
+/* ── Iframe Info Box (left sidebar notice) ── */
+.iframe-info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  margin: 8px 12px;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.iframe-info-box span {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.iframe-info-box a {
+  color: #818cf8;
+  text-decoration: none;
+}
+
+.iframe-info-box a:hover {
+  text-decoration: underline;
 }
 </style>
