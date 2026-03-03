@@ -1,17 +1,20 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import ViewerTestPage from '@/views/ViewerTestPage.vue'
 import ViewerPage from '@/views/ViewerPage.vue'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'viewer-test',
-    component: ViewerTestPage
+    redirect: '/viewer'
   },
   {
     path: '/viewer',
-    name: 'viewer-full',
+    name: 'viewer',
     component: ViewerPage
+  },
+  {
+    // Catch-all: mọi route lạ đều về viewer
+    path: '/:pathMatch(.*)*',
+    redirect: '/viewer'
   }
 ]
 
@@ -21,4 +24,3 @@ const router = createRouter({
 })
 
 export default router
-
