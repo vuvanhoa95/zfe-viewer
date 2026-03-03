@@ -65,6 +65,26 @@ let currentDisplayMode: 'default' | 'wireframe' | 'ghost' = 'default'
 let measureActive = false
 let sectionActive = false
 
+/** Chờ container có kích thước thực sự (> 0) trước khi init WebGL.
+ *  Fix lỗi GL_INVALID_FRAMEBUFFER_OPERATION: Attachment has zero size. */
+function waitForContainerSize(el: HTMLElement, timeout = 3000): Promise<void> {
+  return new Promise((resolve) => {
+    const MAX_WAIT = timeout
+    const start = Date.now()
+    const check = () => {
+      if (el.clientWidth > 0 && el.clientHeight > 0) {
+        resolve()
+      } else if (Date.now() - start >= MAX_WAIT) {
+        console.warn('[SpeckleViewer] Container still 0-size after timeout, init anyway')
+        resolve()
+      } else {
+        requestAnimationFrame(check)
+      }
+    }
+    check()
+  })
+}
+
 // ─── INIT VIEWER ─────────────────────────────────────────────────────────────
 async function initViewer() {
   if (!viewerContainer.value) return
@@ -112,6 +132,8 @@ async function initViewer() {
   if (measurementsExtRef) measurementsExtRef.enabled = false
 
   viewerInstance.resize()
+  // Gọi lại sau 1 frame để đảm bảo framebuffer không còn zero-size
+  requestAnimationFrame(() => viewerInstance?.resize())
 
   resizeObserver = new ResizeObserver(() => viewerInstance?.resize())
   resizeObserver.observe(viewerContainer.value!)
@@ -516,7 +538,10 @@ defineExpose({
 // ─── LIFECYCLE ────────────────────────────────────────────────────────────────
 onMounted(async () => {
   await nextTick()
-  await new Promise(resolve => setTimeout(resolve, 150))
+  // Chờ container có kích thước thực sự — fix GL_INVALID_FRAMEBUFFER zero size
+  if (viewerContainer.value) {
+    await waitForContainerSize(viewerContainer.value)
+  }
   await initViewer()
 })
 
