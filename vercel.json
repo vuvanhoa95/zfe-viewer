@@ -1,8 +1,12 @@
 {
     "rewrites": [
         {
+            "source": "/api/converter/health",
+            "destination": "https://hub.zfenix.com/converter/health"
+        },
+        {
             "source": "/api/converter/:path*",
-            "destination": "https://hub.zfenix.com/converter/:path*"
+            "destination": "https://hub.zfenix.com/converter/api/:path*"
         },
         {
             "source": "/(.*)",

@@ -87,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const emit = defineEmits<{
   (e: 'model-ready', streamId: string, objectId: string): void
@@ -146,9 +146,70 @@ function onFileChange(e: Event) {
   }
 }
 
-function resetAll() {
+async function resetAll() {
+  // Xóa tất cả stream cũ trước khi reset
+  await cleanupAllStreams()
   queue.value = []
 }
+
+// ─── Stream Cleanup ────────────────────────────────────────────────────────────────
+
+/**
+ * Xóa stream trên Speckle Server qua DELETE /api/stream/{job_id}.
+ * Dùng fetch bình thường (khi component unmount / user click reset).
+ */
+async function deleteStream(jobId: string): Promise<void> {
+  if (!jobId || !CONVERTER_URL) return
+  try {
+    await fetch(`${CONVERTER_URL}/api/stream/${jobId}`, { method: 'DELETE' })
+  } catch {
+    // Ignore — best effort
+  }
+}
+
+/**
+ * Xóa tất cả stream của các job đã hoàn thành trong queue hiện tại.
+ * Gọi khi user reset hoặc component unmount.
+ */
+async function cleanupAllStreams(): Promise<void> {
+  const jobsToClean = queue.value.filter(q => q.jobId)
+  await Promise.allSettled(jobsToClean.map(q => deleteStream(q.jobId!)))
+}
+
+/**
+ * Dùng sendBeacon — được gửi kể cả khi trình duyệt đang đóng.
+ * Không dùng fetch vì browser sẽ hủy fetch request trong beforeunload.
+ * Backend có endpoint POST riêng /api/stream/{jobId}/cleanup dành cho beacon.
+ */
+function cleanupWithBeacon(): void {
+  const jobsToClean = queue.value.filter(q => q.jobId)
+  for (const item of jobsToClean) {
+    // POST /api/stream/{jobId}/cleanup — endpoint được thiết kế cho sendBeacon
+    const url = `${CONVERTER_URL}/api/stream/${item.jobId}/cleanup`
+    const sent = navigator.sendBeacon(url)
+    if (!sent) {
+      // sendBeacon thất bại (queue đầy) → fallback fetch keepalive
+      fetch(`${CONVERTER_URL}/api/stream/${item.jobId}`, {
+        method: 'DELETE',
+        keepalive: true,
+      }).catch(() => {})
+    }
+  }
+}
+
+// ─── Lifecycle ───────────────────────────────────────────────────────────────────────────
+
+onMounted(() => {
+  // Lắng nghe sự kiện đóng tab/browser — dùng keepalive fetch vì
+  // sendBeacon chỉ hỗ trợ POST trong khi endpoint cần DELETE
+  window.addEventListener('beforeunload', cleanupWithBeacon)
+})
+
+onUnmounted(async () => {
+  window.removeEventListener('beforeunload', cleanupWithBeacon)
+  // Cleanup đồng bộ khi component bị huỷ (navigate sang trang khác)
+  await cleanupAllStreams()
+})
 
 // ─── Queue management ────────────────────────────────────────────────────────
 function addFiles(files: File[]) {
