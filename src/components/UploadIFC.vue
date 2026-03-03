@@ -94,12 +94,10 @@ const emit = defineEmits<{
 }>()
 
 // ─── Config ──────────────────────────────────────────────────────────────────
-// Trên production (Vercel), dùng /api/converter proxy để tránh CORS
-// Trên dev local, dùng trực tiếp VITE_CONVERTER_URL
-const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')
-const CONVERTER_URL = isProduction
-  ? '/api/converter'
-  : (import.meta.env.VITE_CONVERTER_URL as string | undefined) || 'https://hub.zfenix.com/converter'
+// Gọi trực tiếp hub.zfenix.com để tránh Vercel proxy timeout (10s limit trên Hobby plan)
+// CORS đã được config trong converter cho viewer.zfenix.com
+const CONVERTER_URL = (import.meta.env.VITE_CONVERTER_URL as string | undefined)
+  || 'https://hub.zfenix.com/converter/api'
 
 const POLL_INTERVAL = 2000
 const JOB_TIMEOUT   = 600000 // 10 phút
