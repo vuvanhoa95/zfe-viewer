@@ -78,6 +78,8 @@ async function initViewer() {
     MeasurementsExtension,
     SectionTool,
     SectionOutlines,
+    ViewModes,
+    ViewMode,
   } = await import('@speckle/viewer')
 
   // Cache refs for later use
@@ -96,13 +98,13 @@ async function initViewer() {
   // intensity (sun) vừa phải → có bóng mềm nhưng không quá tối
   viewerInstance.setLightConfiguration({
     enabled: true,
-    castShadow: true,
-    intensity: 5,                 // Sun intensity — vừa đủ
+    castShadow: false,            // Tắt shadow rendering để tránh bóng quá tối
+    intensity: 6,                 // Sun intensity
     color: 0xffffff,
-    indirectLightIntensity: 4,   // Ambient light — sáng đều các mặt khuất
-    elevation: 1.0,               // ~60° cao — ánh sáng từ trên xuống
+    indirectLightIntensity: 8,   // Ambient rất cao → mặt khuất sáng đều
+    elevation: 1.2,
     azimuth: 0.75,
-    shadowcatcher: false,         // Tắt shadowcatcher để tránh nền tối
+    shadowcatcher: false,
   })
 
   // Register extensions
@@ -112,6 +114,7 @@ async function initViewer() {
   measurementsExtRef  = viewerInstance.createExtension(MeasurementsExtension)
   sectionToolRef      = viewerInstance.createExtension(SectionTool)
   viewerInstance.createExtension(SectionOutlines)
+  viewerInstance.createExtension(ViewModes)
 
   // Disable section box + measurements by default
   if (sectionToolRef)    sectionToolRef.enabled = false
@@ -122,11 +125,23 @@ async function initViewer() {
   resizeObserver = new ResizeObserver(() => viewerInstance?.resize())
   resizeObserver.observe(viewerContainer.value!)
 
-  // ─── LoadComplete: camera + populate tree ────────────────────────────────
+  // ─── LoadComplete: camera + populate tree + ViewMode ────────────────────
   viewerInstance.on(ViewerEvent.LoadComplete, async (resourceURL: string) => {
     console.log('[SpeckleViewer] 🎨 LoadComplete:', resourceURL)
     loadProgress.value = 100
-    // loading handled by addModel counters
+
+    // ⚡ Bật SHADED mode ngay sau khi load: giữ màu IFC + edge outlines sắc nét
+    try {
+      const viewModesExt = viewerInstance.getExtension(ViewModes)
+      viewModesExt.setViewMode(ViewMode.SHADED, {
+        outlineThickness: 1,    // Độ dày edge outline (px)
+        outlineColor: 0x000000, // Màu đen cho cạnh
+        outlineOpacity: 0.8,    // Opacity cạnh
+      })
+      console.log('[SpeckleViewer] 🖼️ ViewMode set to SHADED')
+    } catch (e) {
+      console.warn('[SpeckleViewer] ViewMode error:', e)
+    }
     
     // Zoom to fit sau khi geometry settle
     setTimeout(() => {
@@ -572,7 +587,7 @@ watch(
   width: 100%;
   height: 100%;
   position: relative;
-  background: #0f1729;
+  background: #e8eaed;
 }
 
 .overlay {
