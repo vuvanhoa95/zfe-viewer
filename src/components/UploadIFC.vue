@@ -94,7 +94,13 @@ const emit = defineEmits<{
 }>()
 
 // ─── Config ──────────────────────────────────────────────────────────────────
-const CONVERTER_URL = import.meta.env.VITE_CONVERTER_URL as string | undefined
+// Trên production (Vercel), dùng /api/converter proxy để tránh CORS
+// Trên dev local, dùng trực tiếp VITE_CONVERTER_URL
+const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')
+const CONVERTER_URL = isProduction
+  ? '/api/converter'
+  : (import.meta.env.VITE_CONVERTER_URL as string | undefined) || 'https://hub.zfenix.com/converter'
+
 const POLL_INTERVAL = 2000
 const JOB_TIMEOUT   = 600000 // 10 phút
 const MAX_CONCURRENT = 3     // Số file convert đồng thời tối đa
